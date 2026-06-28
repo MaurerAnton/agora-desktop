@@ -1,0 +1,9 @@
+build/
+/tmp/
+*.o
+*.out
+*.swp
+*~
+.DS_Store
+/tmp/
+/agora

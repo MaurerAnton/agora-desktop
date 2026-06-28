@@ -1,0 +1,102 @@
+/* Agora Linux - GTK4 CSS Theme */
+/* Optimized for PineTab 2 / PinePhone mobile display */
+
+window {
+    background-color: @window_bg_color;
+    font-family: 'Cantarell', 'Inter', sans-serif;
+}
+
+/* Messages */
+#user-message {
+    background-color: @accent_bg_color;
+    border-radius: 16px;
+    padding: 10px 14px;
+    margin: 4px 8px;
+    font-size: 14px;
+}
+
+#model-message {
+    background-color: @card_bg_color;
+    border-radius: 16px;
+    padding: 10px 14px;
+    margin: 4px 8px;
+    font-size: 14px;
+}
+
+#error-message {
+    background-color: @error_bg_color;
+    border-radius: 16px;
+    padding: 10px 14px;
+    margin: 4px 8px;
+    font-size: 14px;
+}
+
+/* Metadata labels */
+#status-label {
+    font-size: 11px;
+    opacity: 0.6;
+    margin: 2px 8px;
+}
+
+#timestamp-label {
+    font-size: 10px;
+    opacity: 0.4;
+    margin: 2px 8px;
+}
+
+/* Thoughts block */
+#thought-frame {
+    background-color: alpha(@accent_color, 0.08);
+    border: 1px solid alpha(@accent_color, 0.2);
+    border-radius: 8px;
+    padding: 6px;
+    margin: 4px 0;
+}
+
+/* Sidebar */
+#sidebar listbox row {
+    padding: 6px 8px;
+    border-bottom: 1px solid alpha(@borders, 0.3);
+    min-height: 48px;
+}
+
+#sidebar listbox row:selected {
+    background-color: alpha(@accent_color, 0.15);
+}
+
+/* Input bar */
+#message-entry {
+    border-radius: 20px;
+    padding: 8px 14px;
+    min-height: 40px;
+    font-size: 14px;
+}
+
+/* Buttons */
+#send-button, #mic-button, #stop-button {
+    border-radius: 50%;
+    min-width: 42px;
+    min-height: 42px;
+}
+
+#mic-button.active {
+    background-color: @error_color;
+    color: white;
+}
+
+/* Scrollbar */
+scrolledwindow undershoot.top,
+scrolledwindow undershoot.bottom {
+    background: none;
+}
+
+/* Mobile optimization */
+@media (max-width: 480px) {
+    window {
+        font-size: 14px;
+    }
+    #user-message, #model-message {
+        font-size: 15px;
+        margin: 3px 4px;
+    }
+}
