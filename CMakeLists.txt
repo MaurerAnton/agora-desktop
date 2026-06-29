@@ -33,6 +33,18 @@ if(PIPEWIRE_FOUND)
     add_definitions(-DHAVE_PIPEWIRE)
 endif()
 
+# ALSA (optional)
+pkg_check_modules(ALSA alsa)
+if(ALSA_FOUND)
+    add_definitions(-DHAVE_ALSA)
+endif()
+
+# PortAudio (optional)
+pkg_check_modules(PORTAUDIO portaudio-2.0)
+if(PORTAUDIO_FOUND)
+    add_definitions(-DHAVE_PORTAUDIO)
+endif()
+
 # OpenSSL
 find_package(OpenSSL REQUIRED)
 
@@ -48,7 +60,9 @@ set(SOURCES
     src/api/provider.cpp
     src/audio/recorder.cpp
     src/utils/config.cpp
+    src/utils/import_export.cpp
     src/ui/main_window_qt.cpp
+    src/ui/theme.cpp
 )
 
 set(HEADERS
@@ -69,6 +83,8 @@ target_include_directories(agora PRIVATE
     ${NLOHMANN_JSON_DIR}
     ${CURL_INCLUDE_DIRS}
     ${PIPEWIRE_INCLUDE_DIRS}
+    ${ALSA_INCLUDE_DIRS}
+    ${PORTAUDIO_INCLUDE_DIRS}
     ${SQLite3_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIR}
 )
@@ -78,6 +94,8 @@ target_link_libraries(agora PRIVATE
     SQLite::SQLite3
     ${CURL_LIBRARIES}
     ${PIPEWIRE_LIBRARIES}
+    ${ALSA_LIBRARIES}
+    ${PORTAUDIO_LIBRARIES}
     OpenSSL::Crypto
 )
 

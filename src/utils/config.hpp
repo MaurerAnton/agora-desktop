@@ -39,6 +39,11 @@ struct SttConfig {
     int sample_rate = 16000;
 };
 
+struct ThemeConfig {
+    std::string mode = "system";  // "light", "dark", "system"
+    std::string accent = "midnight"; // seed color preset name
+};
+
 class Config {
 public:
     static Config& instance();
@@ -52,11 +57,20 @@ public:
     std::vector<SystemPromptEntry> system_prompts;
     TorConfig tor;
     SttConfig stt;
+    ThemeConfig theme;
 
     std::string memory_dir;
     std::string db_path;
     int max_context_window = 20;
     bool thinking_enabled = true;
+    float temperature = 0.7f;
+    int max_tokens = 4096;
+    float top_p = 1.0f;
+    float frequency_penalty = 0.0f;
+    float presence_penalty = 0.0f;
+    bool title_gen_enabled = true;
+    bool auto_backup_enabled = false;
+    int auto_backup_hours = 24;
 
     std::string get_api_key(const std::string& provider) const;
     std::string get_base_url(const std::string& provider) const;
@@ -75,3 +89,4 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SystemPromptEntry, id, title, content, user_p
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ProviderConfig, name, base_url, api_key_id, enabled)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(TorConfig, enabled, socks_host, socks_port)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SttConfig, enabled, endpoint_url, sample_rate)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ThemeConfig, mode, accent)

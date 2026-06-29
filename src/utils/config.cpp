@@ -27,6 +27,14 @@ void Config::load(const std::string& path) {
         if (j.contains("active_system_prompt_id")) active_system_prompt_id = j["active_system_prompt_id"];
         if (j.contains("max_context_window")) max_context_window = j["max_context_window"];
         if (j.contains("thinking_enabled")) thinking_enabled = j["thinking_enabled"];
+        if (j.contains("temperature")) temperature = j["temperature"];
+        if (j.contains("max_tokens")) max_tokens = j["max_tokens"];
+        if (j.contains("top_p")) top_p = j["top_p"];
+        if (j.contains("frequency_penalty")) frequency_penalty = j["frequency_penalty"];
+        if (j.contains("presence_penalty")) presence_penalty = j["presence_penalty"];
+        if (j.contains("title_gen_enabled")) title_gen_enabled = j["title_gen_enabled"];
+        if (j.contains("auto_backup_enabled")) auto_backup_enabled = j["auto_backup_enabled"];
+        if (j.contains("auto_backup_hours")) auto_backup_hours = j["auto_backup_hours"];
         if (j.contains("db_path")) db_path = j["db_path"];
         if (j.contains("memory_dir")) memory_dir = j["memory_dir"];
 
@@ -35,6 +43,7 @@ void Config::load(const std::string& path) {
         if (j.contains("system_prompts")) system_prompts = j["system_prompts"];
         if (j.contains("tor")) tor = j["tor"];
         if (j.contains("stt")) stt = j["stt"];
+        if (j.contains("theme")) theme = j["theme"];
     } catch (const std::exception& e) {
         std::cerr << "Failed to parse config: " << e.what() << std::endl;
     }
@@ -50,6 +59,14 @@ void Config::save(const std::string& path) {
     j["active_system_prompt_id"] = active_system_prompt_id;
     j["max_context_window"] = max_context_window;
     j["thinking_enabled"] = thinking_enabled;
+    j["temperature"] = temperature;
+    j["max_tokens"] = max_tokens;
+    j["top_p"] = top_p;
+    j["frequency_penalty"] = frequency_penalty;
+    j["presence_penalty"] = presence_penalty;
+    j["title_gen_enabled"] = title_gen_enabled;
+    j["auto_backup_enabled"] = auto_backup_enabled;
+    j["auto_backup_hours"] = auto_backup_hours;
     j["db_path"] = db_path;
     j["memory_dir"] = memory_dir;
     j["api_keys"] = api_keys;
@@ -57,6 +74,7 @@ void Config::save(const std::string& path) {
     j["system_prompts"] = system_prompts;
     j["tor"] = tor;
     j["stt"] = stt;
+    j["theme"] = theme;
 
     std::ofstream file(save_path);
     if (file.is_open()) {

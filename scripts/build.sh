@@ -21,8 +21,9 @@ else
     GTK_LIBS="-lgtk-4 -lglib-2.0 -lgobject-2.0 -lgio-2.0"
 fi
 
-CXX_FLAGS="-std=c++20 -O2 -I ${PROJECT_DIR}/src -I ${PROJECT_DIR}/src/thirdparty/json ${GTK_CFLAGS}"
-LIBS="${GTK_LIBS} -lsqlite3 -lcurl -lssl -lcrypto -lpthread"
+CXX_FLAGS="-std=c++20 -O2 -I ${PROJECT_DIR}/src -I ${PROJECT_DIR}/src/thirdparty/json \
+  ${GTK_CFLAGS} -I /usr/include/alsa -I /usr/include/pipewire-0.3 -I /usr/include/spa-0.2"
+LIBS="${GTK_LIBS} -lsqlite3 -lcurl -lssl -lcrypto -lasound -lpipewire-0.3 -lportaudio -lpthread"
 
 # Source files in order
 SOURCES=(

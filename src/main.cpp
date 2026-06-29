@@ -9,6 +9,7 @@
 #include "api/http_client.hpp"
 #include "utils/config.hpp"
 #include "ui/main_window_qt.hpp"
+#include "ui/theme.hpp"
 
 static void init_databases(const std::string& config_path) {
     auto& cfg = Config::instance();
@@ -121,6 +122,10 @@ Guidelines:
     MainWindow window;
     window.set_database(db);
     window.set_http_client(http);
+
+    // Theme
+    auto theme_mode = QString::fromStdString(Config::instance().theme.mode);
+    AgoraTheme::apply(&window, theme_mode);
 
     if (headless) {
         window.set_headless(true);

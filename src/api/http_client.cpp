@@ -1,4 +1,5 @@
 #include "api/http_client.hpp"
+#include <iostream>
 #include <stdexcept>
 #include <sstream>
 #include <cstring>
@@ -161,6 +162,10 @@ static std::string url_encode(const std::string& url) {
         if (c == '#') { result += "%23"; continue; }
         if (c == '%') { result += "%25"; continue; }
         if (c == '+') { result += "%2B"; continue; }
+        if (c == '@') { result += "%40"; continue; }
+        if (c == '?') { result += "%3F"; continue; }
+        if (c == '&') { result += "%26"; continue; }
+        if (c == '=') { result += "%3D"; continue; }
         result += c;
     }
     return result;
@@ -215,13 +220,19 @@ int HttpClient::stream_post(const std::string& url,
     long http_code = 0;
     curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &http_code);
 
+    char* effective_url = nullptr;
+    curl_easy_getinfo(curl_, CURLINFO_EFFECTIVE_URL, &effective_url);
+
     curl_slist_free_all(header_list);
     curl_easy_reset(curl_);
 
     if (res != CURLE_OK && res != CURLE_WRITE_ERROR) {
         StreamEvent evt;
         evt.type = StreamEvent::ERROR;
-        evt.text = "Request failed [" + url + "]: " + std::string(curl_easy_strerror(res));
+        evt.text = "Request failed [" + url + "]: " + std::string(curl_easy_strerror(res))
+                 + " (curl_code=" + std::to_string((int)res)
+                 + ", http_status=" + std::to_string(http_code)
+                 + (effective_url ? ", effective_url=" + std::string(effective_url) : "") + ")";
         callback(evt);
     }
 
@@ -260,9 +271,18 @@ std::string HttpClient::post(const std::string& url,
         curl_easy_setopt(curl_, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
     }
 
-    curl_easy_perform(curl_);
+    CURLcode res = curl_easy_perform(curl_);
+
+    long http_code = 0;
+    curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &http_code);
+
     curl_slist_free_all(header_list);
     curl_easy_reset(curl_);
+
+    if (res != CURLE_OK) {
+        std::cerr << "[http] POST " << url << " failed: " << curl_easy_strerror(res)
+                  << " (curl_code=" << (int)res << ", http_status=" << http_code << ")" << std::endl;
+    }
 
     return response;
 }
@@ -293,9 +313,18 @@ std::string HttpClient::get(const std::string& url,
         curl_easy_setopt(curl_, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5_HOSTNAME);
     }
 
-    curl_easy_perform(curl_);
+    CURLcode res = curl_easy_perform(curl_);
+
+    long http_code = 0;
+    curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &http_code);
+
     curl_slist_free_all(header_list);
     curl_easy_reset(curl_);
+
+    if (res != CURLE_OK) {
+        std::cerr << "[http] GET " << url << " failed: " << curl_easy_strerror(res)
+                  << " (curl_code=" << (int)res << ", http_status=" << http_code << ")" << std::endl;
+    }
 
     return response;
 }

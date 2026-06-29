@@ -47,6 +47,10 @@ private slots:
     void show_pinned_view();
     void hide_pinned_view();
     void show_settings();
+    void show_prompt_selector();
+    void show_advanced_settings();
+    void regenerate_last();
+    void attach_image();
     void on_search_changed(const QString& text);
 
 private:
@@ -58,6 +62,8 @@ private:
 
     QString active_conv_id_;
     std::vector<Message> messages_;
+    std::map<std::string, std::string> selected_branches_;
+    std::map<std::string, int> msg_sibling_counts_;
     std::mutex msg_mutex_;
 
     // Streaming state
@@ -84,7 +90,9 @@ private:
     QPushButton* send_btn_ = nullptr;
     QPushButton* mic_btn_ = nullptr;
     QPushButton* stop_btn_ = nullptr;
+    QPushButton* attach_btn_ = nullptr;
     QLabel* status_label_ = nullptr;
+    QString attached_image_path_;
 
     // Helpers
     QString generate_id();
@@ -92,13 +100,21 @@ private:
     QString status_text(MessageStatus s);
     QWidget* create_message_widget(const Message& msg);
     void render_messages();
-    void do_send_message(const QString& text);
+    void build_message_path();
+    void switch_branch(const QString& parent_id, int direction);
+    void update_streaming_message();
+    void do_send_message(const QString& text, const QString& preg_parent_id = {});
+    void handle_command(const QString& text);
     void scroll_to_bottom();
     void set_input_enabled(bool enabled);
 
     // Headless mode
     bool headless_ = false;
     QTimer* headless_timer_ = nullptr;
+
+    // Auto backup
+    QTimer* auto_backup_timer_ = nullptr;
+    void do_auto_backup();
 
     // Render throttling
     QTimer* render_timer_ = nullptr;
