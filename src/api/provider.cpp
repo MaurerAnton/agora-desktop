@@ -91,6 +91,27 @@ std::vector<ToolDefinition> Provider::get_builtin_tools() {
             R"({"type":"object","properties":{"query":{"type":"string","description":"Search query"}},"required":["query"]})"});
     }
 
+    // Tomogichi bridge tools (always available when tomogichi-agora.json exists)
+    {
+        const char* home = getenv("HOME");
+        std::string p = home ? std::string(home) + "/tomogichi-agora.json" : "tomogichi-agora.json";
+        std::ifstream f(p);
+        bool tomogichi_exists = f.is_open();
+        f.close();
+
+        if (tomogichi_exists) {
+            tools.push_back({"function", "tomogichi_read",
+                "Read the user's Tomogichi data (characters, skills, calendar, tasks, challenges, stats). Use this to get the latest state.",
+                R"({"type":"object","properties":{},"required":[]})"});
+            tools.push_back({"function", "tomogichi_diary_add",
+                "Add a diary entry to Tomogichi. Always ask the user for permission BEFORE calling this tool. The user must explicitly agree.",
+                R"({"type":"object","properties":{"text":{"type":"string","description":"Diary entry text"}},"required":["text"]})"});
+            tools.push_back({"function", "tomogichi_emergency_check",
+                "Check if the user has triggered an emergency (bad mental state). Returns the emergency message if active.",
+                R"({"type":"object","properties":{},"required":[]})"});
+        }
+    }
+
     return tools;
 }
 
@@ -130,6 +151,45 @@ std::string Provider::execute_tool(const std::string& name, const std::string& a
             std::string fname = jargs.value("name", "");
             mem.delete_file(fname);
             return "Memory file deleted: " + fname;
+        }
+        // Tomogichi tools
+        if (name == "tomogichi_read") {
+            const char* home = getenv("HOME");
+            std::string p = home ? std::string(home) + "/tomogichi-agora.json" : "tomogichi-agora.json";
+            std::ifstream f(p);
+            if (f.is_open()) {
+                std::ostringstream buf; buf << f.rdbuf(); f.close();
+                return buf.str();
+            }
+            return "Tomogichi data not found. Ask the user to run 'tomogichi' first.";
+        }
+        if (name == "tomogichi_diary_add") {
+            std::string text = jargs.value("text", "");
+            if (text.empty()) return "Error: diary text is empty.";
+            const char* home = getenv("HOME");
+            std::string state_path;
+            if (home) state_path = std::string(home) + "/data/state.json";
+            else state_path = "data/state.json";
+            // Append to diary via shell
+            std::string escaped = text;
+            // Simple escaping: replace " with \"
+            for (size_t i = 0; i < escaped.size(); i++) {
+                if (escaped[i] == '"') { escaped.insert(i, "\\"); i++; }
+            }
+            std::string cmd = "echo \"diary " + escaped + "\" | timeout 3 " + std::string(home ? home : "~") + "/tomogichi >/dev/null 2>&1";
+            int ret = system(cmd.c_str());
+            if (ret == 0) return "Diary entry saved to Tomogichi: \"" + text + "\". Remind the user to run 'tomogichi' and check with 'diary show'.";
+            return "Failed to save diary. Ask the user to run manually: tomogichi-diary-add \"" + text + "\"";
+        }
+        if (name == "tomogichi_emergency_check") {
+            const char* home = getenv("HOME");
+            std::string p = home ? std::string(home) + "/agora-emergency.md" : "agora-emergency.md";
+            std::ifstream f(p);
+            if (f.is_open()) {
+                std::ostringstream buf; buf << f.rdbuf(); f.close();
+                return buf.str();
+            }
+            return "No active emergency.";
         }
         if (name == "web_search") {
             std::string query = jargs.value("query", "");
