@@ -14,6 +14,35 @@
 Provider::Provider(const GenConfig& config, HttpClient& client)
     : config_(config), client_(client) {}
 
+// --- Tomogichi bridge helper ---
+
+static std::string tomogichi_bridge_data() {
+    std::ostringstream result;
+    const char* home = getenv("HOME");
+
+    // Read tomogichi JSON
+    {
+        std::string p = home ? std::string(home) + "/tomogichi-agora.json" : "tomogichi-agora.json";
+        std::ifstream f(p);
+        if (f.is_open()) {
+            std::ostringstream buf; buf << f.rdbuf(); f.close();
+            result << "\n\n<tomogichi>\n" << buf.str() << "\n</tomogichi>";
+        }
+    }
+
+    // Read emergency flag
+    {
+        std::string p = home ? std::string(home) + "/agora-emergency.md" : "agora-emergency.md";
+        std::ifstream f(p);
+        if (f.is_open()) {
+            std::ostringstream buf; buf << f.rdbuf(); f.close();
+            result << "\n\n" << buf.str();
+        }
+    }
+
+    return result.str();
+}
+
 std::unique_ptr<Provider> Provider::create(const GenConfig& config, HttpClient& client) {
     if (config.provider == "anthropic") {
         return std::make_unique<AnthropicProvider>(config, client);
@@ -250,6 +279,8 @@ std::vector<json> Provider::prepare_messages_openai(const std::vector<Message>& 
         if (!active_mem.empty()) {
             resolved += "\n\n<active_memory>\n" + active_mem + "\n</active_memory>";
         }
+        // Append Tomogichi bridge + emergency if present
+        resolved += tomogichi_bridge_data();
         result.push_back({{"role", "system"}, {"content", resolved}});
     }
 
@@ -409,6 +440,7 @@ void AnthropicProvider::generate(const std::vector<Message>& messages,
         std::string resolved = resolve_variables(config_.system_prompt);
         std::string active_mem = MemoryManager::instance().get_active_memory();
         if (!active_mem.empty()) resolved += "\n\n<active_memory>\n" + active_mem + "\n</active_memory>";
+        resolved += tomogichi_bridge_data();
         body["system"] = resolved;
     }
 
@@ -461,6 +493,7 @@ void OllamaProvider::generate(const std::vector<Message>& messages,
         std::string resolved = resolve_variables(config_.system_prompt);
         std::string active_mem = MemoryManager::instance().get_active_memory();
         if (!active_mem.empty()) resolved += "\n\n<active_memory>\n" + active_mem + "\n</active_memory>";
+        resolved += tomogichi_bridge_data();
         api_messages.push_back({{"role", "system"}, {"content", resolved}});
     }
 
@@ -539,6 +572,7 @@ void GeminiProvider::generate(const std::vector<Message>& messages,
         std::string resolved = resolve_variables(config_.system_prompt);
         std::string active_mem = MemoryManager::instance().get_active_memory();
         if (!active_mem.empty()) resolved += "\n\n<active_memory>\n" + active_mem + "\n</active_memory>";
+        resolved += tomogichi_bridge_data();
         json sys_part;
         sys_part["text"] = resolved;
         contents.push_back({{"role", "user"}, {"parts", json::array({sys_part})}});

@@ -38,7 +38,7 @@
 #include <unistd.h>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
-    setWindowTitle("agora-desktop");
+    setWindowTitle("agora-desktop v0.1.0");
     resize(720, 560);
     setMinimumSize(360, 400);
 
