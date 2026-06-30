@@ -60,6 +60,7 @@ set(SOURCES
     src/api/provider.cpp
     src/audio/recorder.cpp
     src/utils/config.cpp
+    src/utils/memory_manager.cpp
     src/utils/import_export.cpp
     src/ui/main_window_qt.cpp
     src/ui/theme.cpp

@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <fstream>
 #include <openssl/sha.h>
 
 Provider::Provider(const GenConfig& config, HttpClient& client)
@@ -178,6 +179,36 @@ std::string Provider::resolve_variables(const std::string& template_str, int64_t
     replace("{time}", time);
     replace("{current_date}", date);
     replace("{active_memory}", MemoryManager::instance().get_active_memory());
+
+    /* Tomogichi bridge — read the JSON export file */
+    {
+        const char* home = getenv("HOME");
+        std::string tomogichi_path = home ? std::string(home) + "/tomogichi-agora.json" : "tomogichi-agora.json";
+        std::ifstream f(tomogichi_path);
+        if (f.is_open()) {
+            std::ostringstream buf;
+            buf << f.rdbuf();
+            replace("{tomogichi}", buf.str());
+            f.close();
+        } else {
+            replace("{tomogichi}", "");
+        }
+    }
+
+    /* Emergency check — read the emergency file */
+    {
+        const char* home = getenv("HOME");
+        std::string emerg_path = home ? std::string(home) + "/agora-emergency.md" : "agora-emergency.md";
+        std::ifstream f(emerg_path);
+        if (f.is_open()) {
+            std::ostringstream buf;
+            buf << f.rdbuf();
+            replace("{emergency}", buf.str());
+            f.close();
+        } else {
+            replace("{emergency}", "");
+        }
+    }
 
     if (timestamp > 0) {
         std::time_t ts = timestamp / 1000;
